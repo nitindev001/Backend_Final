@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile Card</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f1f0eb;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .profile-card {
+      width: 420px;
+      padding: 35px;
+      text-align: center;
+      background-color: #ffffff;
+      border: 1px solid #d8d6cf;
+      border-radius: 25px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .profile-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .avatar {
+      width: 132px;
+      height: 132px;
+      margin: 0 auto 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      background-color: #b5d3f3;
+      color: #164d80;
+      font-size: 42px;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0 0 7px;
+      color: #292929;
+      font-size: 30px;
+    }
+
+    .bio {
+      max-width: 310px;
+      margin: 0 auto 24px;
+      color: #666666;
+      font-size: 20px;
+      line-height: 1.5;
+    }
+
+    .skills {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    .skill {
+      padding: 5px 16px;
+      border-radius: 20px;
+      background-color: #e5f1fc;
+      color: #164d80;
+      font-size: 18px;
+    }
+
+    .follow-button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background-color: #2d2d2b;
+      color: #ffffff;
+      font-size: 20px;
+      cursor: pointer;
+      transition: background-color 0.25s ease, transform 0.25s ease;
+    }
+
+    .follow-button:hover {
+      background-color: #164d80;
+      transform: scale(1.02);
+    }
+
+    @media (max-width: 480px) {
+      .profile-card {
+        width: calc(100% - 32px);
+        padding: 28px 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="profile-card">
+    <div class="avatar">RS</div>
+    <h1>Ravi Sharma</h1>
+    <p class="bio">Frontend learner who loves building small web apps.</p>
+
+    <div class="skills">
+      <span class="skill">HTML</span>
+      <span class="skill">CSS</span>
+      <span class="skill">JS</span>
+    </div>
+
+    <button class="follow-button" type="button">Follow</button>
+  </main>
+</body>
+</html>
