@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assignment 4 - Todo List</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f1efe9;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #292929;
+    }
+
+    .todo-card {
+      width: 100%;
+      max-width: 650px;
+      padding: 30px 32px;
+      background: #fff;
+      border: 1px solid #d8d5cd;
+      border-radius: 25px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    }
+
+    .todo-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 30px;
+    }
+
+    #remainingCount {
+      color: #666;
+      font-size: 18px;
+      white-space: nowrap;
+    }
+
+    .add-form {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .add-form input {
+      min-width: 0;
+      flex: 1;
+      padding: 12px 16px;
+      border: 1.5px solid #bcb9b1;
+      border-radius: 12px;
+      font-size: 18px;
+      outline: none;
+    }
+
+    .add-form input:focus {
+      border-color: #397a12;
+      box-shadow: 0 0 0 3px rgba(57, 122, 18, 0.12);
+    }
+
+    button {
+      padding: 9px 20px;
+      border: 1.5px solid #99968f;
+      border-radius: 12px;
+      background: #fff;
+      color: #292929;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background-color 0.2s ease, color 0.2s ease,
+                  transform 0.2s ease;
+    }
+
+    button:hover {
+      background: #292929;
+      border-color: #292929;
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    .todo-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0;
+      border-top: 1px solid #d8d5cd;
+    }
+
+    .todo-item input[type="checkbox"] {
+      width: 28px;
+      height: 28px;
+      flex: 0 0 auto;
+      margin: 0;
+      accent-color: #397a12;
+      cursor: pointer;
+    }
+
+    .todo-text {
+      flex: 1;
+      min-width: 0;
+      font-size: 20px;
+      overflow-wrap: anywhere;
+    }
+
+    .todo-text.done {
+      color: #999;
+      text-decoration: line-through;
+    }
+
+    .delete-button {
+      padding: 6px 15px;
+      font-size: 16px;
+      flex: 0 0 auto;
+    }
+
+    .empty-message {
+      padding: 18px 0;
+      border-top: 1px solid #d8d5cd;
+      color: #777;
+      text-align: center;
+      font-size: 17px;
+    }
+
+    @media (max-width: 520px) {
+      .todo-card {
+        padding: 24px 18px;
+      }
+
+      .todo-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      h1 {
+        font-size: 26px;
+      }
+
+      #remainingCount {
+        font-size: 16px;
+      }
+
+      .add-form input {
+        font-size: 16px;
+      }
+
+      .add-form button {
+        padding: 9px 14px;
+        font-size: 16px;
+      }
+
+      .todo-text {
+        font-size: 17px;
+      }
+
+      .delete-button {
+        padding: 6px 10px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="todo-card">
+    <header class="todo-header">
+      <h1>My todos</h1>
+      <span id="remainingCount">2 tasks remaining</span>
+    </header>
+
+    <form class="add-form" id="todoForm">
+      <input
+        type="text"
+        id="todoInput"
+        placeholder="Buy groceries"
+        aria-label="Enter a new task"
+        autocomplete="off"
+      >
+      <button type="submit">Add</button>
+    </form>
+
+    <ul class="todo-list" id="todoList"></ul>
+  </main>
+
+  <script>
+    // Each task is an object with an id, text and done status.
+    let tasks = [
+      { id: 1, text: "Revise destructuring", done: false },
+      { id: 2, text: "Practice map and filter", done: true },
+      { id: 3, text: "Read about fetch", done: false }
+    ];
+
+    let nextId = 4;
+
+    const todoForm = document.getElementById("todoForm");
+    const todoInput = document.getElementById("todoInput");
+    const todoList = document.getElementById("todoList");
+    const remainingCount = document.getElementById("remainingCount");
+
+    // Draw the complete list using map().
+    function render() {
+      const remaining = tasks.filter(task => !task.done).length;
+      remainingCount.textContent =
+        `${remaining} ${remaining === 1 ? "task" : "tasks"} remaining`;
+
+      if (tasks.length === 0) {
+        todoList.innerHTML = '<li class="empty-message">No tasks yet. Add one above!</li>';
+        return;
+      }
+
+      todoList.innerHTML = tasks.map(task => `
+        <li class="todo-item">
+          <input
+            type="checkbox"
+            class="task-checkbox"
+            data-id="${task.id}"
+            aria-label="Mark ${escapeHTML(task.text)} as complete"
+            ${task.done ? "checked" : ""}
+          >
+          <span class="todo-text ${task.done ? "done" : ""}">
+            ${escapeHTML(task.text)}
+          </span>
+          <button
+            type="button"
+            class="delete-button"
+            data-id="${task.id}"
+          >Delete</button>
+        </li>
+      `).join("");
+    }
+
+    // Escape user-entered text before inserting it into the page.
+    function escapeHTML(value) {
+      return value.replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[character]);
+    }
+
+    // Add a new task by creating a new array with spread.
+    todoForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const text = todoInput.value.trim();
+      if (text === "") {
+        todoInput.focus();
+        return;
+      }
+
+      tasks = [...tasks, {
+        id: nextId++,
+        text: text,
+        done: false
+      }];
+
+      todoInput.value = "";
+      render();
+      todoInput.focus();
+    });
+
+    // Event delegation handles checkbox changes and Delete button clicks.
+    todoList.addEventListener("change", function (event) {
+      if (event.target.classList.contains("task-checkbox")) {
+        const id = Number(event.target.dataset.id);
+
+        // map() creates a new array; the matching task is copied with spread.
+        tasks = tasks.map(task =>
+          task.id === id
+            ? { ...task, done: event.target.checked }
+            : task
+        );
+
+        render();
+      }
+    });
+
+    todoList.addEventListener("click", function (event) {
+      if (event.target.classList.contains("delete-button")) {
+        const id = Number(event.target.dataset.id);
+
+        // filter() creates a new array without the deleted task.
+        tasks = tasks.filter(task => task.id !== id);
+
+        render();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
