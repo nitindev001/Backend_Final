@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tally – Personal finance manager</title>
+  <meta name="description" content="Track your monthly budget, see where your money goes and get advice based on your income, salary or pocket money.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <div class="app">
+    <aside class="side">
+      <a class="brand" href="#overview"><img src="assets/favicon.svg" alt="" width="30" height="30"><span>Tally</span></a>
+      <nav class="nav" aria-label="Main">
+        <a href="#overview" data-view="overview">Overview</a>
+        <a href="#transactions" data-view="transactions">Expenses</a>
+        <a href="#budgets" data-view="budgets">Budgets</a>
+        <a href="#settings" data-view="settings">Settings</a>
+      </nav>
+    </aside>
+
+    <div class="content">
+      <header class="top">
+        <div class="month">
+          <button class="icon-btn" id="prevMonth" type="button" aria-label="Previous month">&lsaquo;</button>
+          <span class="label" id="monthLabel" aria-live="polite"></span>
+          <button class="icon-btn" id="nextMonth" type="button" aria-label="Next month">&rsaquo;</button>
+          <button class="btn small" id="thisMonth" type="button" hidden>This month</button>
+        </div>
+        <button class="btn primary" id="addBtn" type="button">Add expense</button>
+      </header>
+
+      <main id="main">
+        <!-- Overview -->
+        <section class="view" data-view="overview">
+          <div class="hero">
+            <div class="chart-wrap">
+              <canvas id="pie" role="img" aria-label="Expense breakdown"></canvas>
+            </div>
+            <div class="hero-side">
+              <h1 id="heroTitle"></h1>
+              <p class="sub" id="heroSub"></p>
+              <dl class="ledger">
+                <div><dt>Income</dt><dd id="lgIncome"></dd></div>
+                <div><dt>Spent</dt><dd id="lgSpent"></dd></div>
+                <div><dt>Saved</dt><dd id="lgSaved"></dd></div>
+                <div class="total"><dt id="lgLeftLabel">Left to spend</dt><dd id="lgLeft"></dd></div>
+              </dl>
+              <div class="meter" aria-hidden="true"><div class="meter-fill" id="meterFill"></div></div>
+              <p class="meter-text" id="meterText"></p>
+            </div>
+          </div>
+
+          <div class="split">
+            <section aria-labelledby="legendTitle">
+              <h2 id="legendTitle">Where it went</h2>
+              <ul class="legend" id="legend"></ul>
+              <p class="empty" id="legendEmpty" hidden>Nothing logged for this month yet. Use <strong>Add expense</strong> to start your breakdown.</p>
+            </section>
+            <section class="advice" aria-labelledby="adviceTitle">
+              <h2 id="adviceTitle">Advice for this month</h2>
+              <ul id="adviceList"></ul>
+            </section>
+          </div>
+        </section>
+
+        <!-- Expenses -->
+        <section class="view" data-view="transactions" hidden>
+          <h1>Expenses</h1>
+          <div class="filters">
+            <label class="field"><span class="sr">Search</span><input type="search" id="search" placeholder="Search expenses" autocomplete="off"></label>
+            <label class="field"><span class="sr">Category</span><select id="filterCat"></select></label>
+            <button class="btn" id="exportBtn" type="button">Export CSV</button>
+          </div>
+          <p class="sub" id="txSummary"></p>
+          <ul class="txlist" id="txList"></ul>
+          <p class="empty" id="txEmpty" hidden></p>
+        </section>
+
+        <!-- Budgets -->
+        <section class="view" data-view="budgets" hidden>
+          <h1>Budgets</h1>
+          <p class="sub">Choose what share of your income each category gets. <strong id="pctTotal"></strong></p>
+          <form id="budgetForm" novalidate>
+            <div id="budgetRows" class="brows"></div>
+            <div class="actions">
+              <button class="btn" type="button" id="resetBudgets">Use recommended split</button>
+              <button class="btn primary" type="submit">Save budgets</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Settings -->
+        <section class="view" data-view="settings" hidden>
+          <h1>Settings</h1>
+          <dl class="ledger settings-list" id="settingsList"></dl>
+          <div class="actions left">
+            <button class="btn primary" id="editProfile" type="button">Edit income details</button>
+            <button class="btn" id="exportBtn2" type="button">Export CSV</button>
+            <button class="btn danger" id="clearBtn" type="button">Delete all data</button>
+          </div>
+          <p class="sub">Your data is stored only in this browser. Nothing is sent anywhere.</p>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Setup / edit income -->
+  <dialog id="setupDialog" aria-labelledby="setupTitle">
+    <form id="setupForm" novalidate>
+      <h2 id="setupTitle">Set up your budget</h2>
+      <p class="hint">Tell us what you live on each month. We use it to set budgets and give advice.</p>
+      <fieldset class="seg">
+        <legend>Where does your money come from?</legend>
+        <label><input type="radio" name="type" value="salary" checked><span>Salary</span></label>
+        <label><input type="radio" name="type" value="income"><span>Other income</span></label>
+        <label><input type="radio" name="type" value="pocket"><span>Pocket money</span></label>
+      </fieldset>
+      <div class="row2">
+        <label class="field"><span id="incomeLabel">Monthly salary (after tax)</span>
+          <input name="income" type="number" min="1" step="0.01" inputmode="decimal" required></label>
+        <label class="field"><span>Currency</span>
+          <select name="currency">
+            <option value="INR">₹ INR</option>
+            <option value="USD">$ USD</option>
+            <option value="EUR">€ EUR</option>
+            <option value="GBP">£ GBP</option>
+          </select></label>
+      </div>
+      <p class="form-error" id="setupError" role="alert"></p>
+      <div class="actions">
+        <button class="btn" type="button" id="setupCancel">Cancel</button>
+        <button class="btn primary" type="submit">Save and continue</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Add / edit expense -->
+  <dialog id="expenseDialog" aria-labelledby="expTitle">
+    <form id="expenseForm" novalidate>
+      <h2 id="expTitle">Add expense</h2>
+      <label class="field"><span>What was it for?</span>
+        <input name="desc" maxlength="60" placeholder="e.g. Groceries" autocomplete="off" required></label>
+      <div class="row2">
+        <label class="field"><span>Amount</span>
+          <input name="amount" type="number" min="0.01" step="0.01" inputmode="decimal" required></label>
+        <label class="field"><span>Date</span>
+          <input name="date" type="date" required></label>
+      </div>
+      <label class="field"><span>Category</span><select name="cat"></select></label>
+      <p class="form-error" id="expError" role="alert"></p>
+      <div class="actions">
+        <button class="btn" type="button" id="expCancel">Cancel</button>
+        <button class="btn primary" type="submit">Save expense</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Confirm -->
+  <dialog id="confirmDialog" aria-labelledby="confTitle">
+    <form method="dialog" id="confirmForm">
+      <h2 id="confTitle"></h2>
+      <p class="hint" id="confText"></p>
+      <div class="actions">
+        <button class="btn" type="submit" value="no">Cancel</button>
+        <button class="btn danger" type="submit" value="yes" id="confOk">Delete</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="script.js"></script>
+</body>
+</html>
